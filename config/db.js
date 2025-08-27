@@ -10,6 +10,10 @@ const pool = new Pool({
   // port: process.env.DB_PORT, 
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+
+  // New settings to keep the connection alive
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 pool.connect()
