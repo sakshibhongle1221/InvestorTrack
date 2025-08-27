@@ -34,8 +34,8 @@ const db = require('../config/db');
     if(!isMatch){
       return res.status(401).json({message:'Invalid Password'});
     }
-    const token = jwt.sign({userID: user.rows[0].user_id},process.env.JWT_SECRET,{expiresIn:'1h',});
-    res.status(200).json({token:token, userId: user.rows[0].user_id ,message:'Login Succesful'});
+    const token = jwt.sign({ userID: user.rows[0].user_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.status(200).json({ token: token, userId: user.rows[0].user_id, message: 'Login Succesful' });
 
   } catch (err) {
     console.error(err);
