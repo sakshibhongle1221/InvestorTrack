@@ -2,24 +2,59 @@ const db = require('../config/db');
  const bcrypt = require('bcryptjs');
  const jwt = require('jsonwebtoken');
 
- const signupUser = async (req,res ) => {
- // “From the user’s submitted form (which is in req.body), pull out the email and password values, and store them in two variables called email and password.”
- try {
-  const {email,password} = req.body ;
-  const existingUser = await db.query('SELECT * FROM users WHERE email = $1',[email]);
-  if(existingUser.rows.length > 0){
-    return res.status(400).json({message: 'user already exists'})
+
+ const signupUser = async (req,res) => {
+  // --- NEW LOG ---
+  console.log("--- ATTEMPTING TO SIGN UP USER ---");
+
+  try {
+    const {email,password} = req.body ;
+    console.log(`Received signup request for email: ${email}`); // New log
+
+    const existingUser = await db.query('SELECT * FROM users WHERE email = $1',[email]);
+    if(existingUser.rows.length > 0){
+      console.log("User already exists."); // New log
+      return res.status(400).json({message: 'user already exists'})
+    }
+
+    console.log("Hashing password..."); // New log
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password,salt);
+
+    console.log("Inserting new user into database..."); // New log
+    await db.query('INSERT INTO users (email,password_hash) VALUES ($1,$2)',[email,hashedPassword]);
+
+    console.log("User created successfully!"); // New log
+    res.status(201).json({ message: 'User created successfully' });
+  } 
+  catch (err) {
+    // --- NEW, VERY LOUD ERROR LOG ---
+    console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    console.error("!!!!!! SIGNUP ERROR DETECTED !!!!!!");
+    console.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    console.error(err); // This will print the exact error object
+    res.status(500).json({ message: 'Something went wrong' });
   }
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password,salt);
-  await db.query('INSERT INTO users (email,password_hash) VALUES ($1,$2)',[email,hashedPassword]);
-  res.status(201).json({ message: 'User created successfully' });
- } 
- catch (err) {
-  console.error(err);
-  res.status(500).json({ message: 'Something went wrong' });
- }
  };
+
+// const signupUser = async (req,res ) => {
+// // “From the user’s submitted form (which is in req.body), pull out the //email and password values, and store them in two variables called email //and password.”
+// try {
+//  const {email,password} = req.body ;
+//  const existingUser = await db.query('SELECT * FROM users WHERE email = //$1',[email]);
+//  if(existingUser.rows.length > 0){
+//    return res.status(400).json({message: 'user already exists'})
+//  }
+//  const salt = await bcrypt.genSalt(10);
+//  const hashedPassword = await bcrypt.hash(password,salt);
+//  await db.query('INSERT INTO users (email,password_hash) VALUES ($1,$2)',//[email,hashedPassword]);
+//  res.status(201).json({ message: 'User created successfully' });
+// } 
+// catch (err) {
+//  console.error(err);
+//  res.status(500).json({ message: 'Something went wrong' });
+// }
+// };
 
  const loginUser = async (req,res) => {
   try {
