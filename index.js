@@ -7,9 +7,14 @@ const port = process.env.PORT || 3000;
 const userRoutes = require('./routes/userRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
-const goalRoutes = require('./routes/goalRoutes')
+const goalRoutes = require('./routes/goalRoutes');
 
-app.use(cors());
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}));
+app.use(express.json());
 app.use(express.json());
 app.use('/',userRoutes);
 app.use('/api',transactionRoutes);
